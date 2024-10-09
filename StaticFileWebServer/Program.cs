@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
+using System.Diagnostics;
+using System;
 
 namespace StaticFileWebServer
 {
@@ -25,6 +27,11 @@ namespace StaticFileWebServer
                     return;
                 }
             });
+            Thread thread = new Thread(() => {
+                Thread.Sleep(500);
+                Process.Start(new ProcessStartInfo("http://localhost:5000") { UseShellExecute = true });
+            });
+            thread.Start();
             app.Run();
         }
     }
