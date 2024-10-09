@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using System.Diagnostics;
 using System;
+using System.Text.RegularExpressions;
 
 namespace StaticFileWebServer
 {
@@ -18,12 +19,12 @@ namespace StaticFileWebServer
             app.Run(async h => {
                 var path = Path.GetFullPath(System.IO.Path.Combine(env.ContentRootPath, (h.Request.Path.Value + "/index.html").TrimStart('/')));
                 if (File.Exists(path)) {
-                    await h.Response.WriteAsync(await File.ReadAllTextAsync(path));
+                    await h.Response.WriteAsync(ReplaceHtml(await File.ReadAllTextAsync(path)));
                     return;
                 }
                 path = Path.GetFullPath(System.IO.Path.Combine(env.ContentRootPath, (h.Request.Path.Value + "/index.htm").TrimStart('/')));
                 if (File.Exists(path)) {
-                    await h.Response.WriteAsync(await File.ReadAllTextAsync(path));
+                    await h.Response.WriteAsync(ReplaceHtml(await File.ReadAllTextAsync(path)));
                     return;
                 }
             });
@@ -33,6 +34,12 @@ namespace StaticFileWebServer
             });
             thread.Start();
             app.Run();
+        }
+        private static string ReplaceHtml(string html)
+        {
+            html = Regex.Replace(html, @"https://[^\.]*?\.github\.io/", "/");
+            // chinese view url error
+            return html.Replace("https://cdn.jsdelivr.net/", "https://fastly.jsdelivr.net/");
         }
     }
 }
